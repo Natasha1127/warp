@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import QuestionFigure from "@/components/QuestionFigure";
 
 interface Choice {
   id: string;
@@ -11,6 +12,7 @@ interface Choice {
 interface Question {
   id: string;
   body: string;
+  figure?: string | null;
   layer: number;
   hint: string | null;
   choices: Choice[];
@@ -168,6 +170,11 @@ export default function QuestionCard({
              style={{ color: "#f3f9ff", textShadow: "0 0 14px rgba(120,180,255,0.35)" }}>
             {question.body}
           </p>
+          {question.figure && (
+            <div className="mt-3">
+              <QuestionFigure figure={question.figure} />
+            </div>
+          )}
         </div>
 
         {/* 選択肢 */}

@@ -57,12 +57,13 @@ export async function GET(req: NextRequest) {
 }
 
 type Choice = { id: string; body: string; order: number; isCorrect: boolean; warpMicroUnitId: string | null; warpLayer: number | null };
-type QuestionWithChoices = { id: string; body: string; layer: number; hint: string | null; microUnitId: string; choices: Choice[] };
+type QuestionWithChoices = { id: string; body: string; figure: string | null; layer: number; hint: string | null; microUnitId: string; choices: Choice[] };
 
 function sanitize(q: QuestionWithChoices) {
   return {
     id: q.id,
     body: q.body,
+    figure: q.figure,
     layer: q.layer,
     hint: q.hint,
     microUnitId: q.microUnitId,

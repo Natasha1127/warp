@@ -9,6 +9,7 @@ import { useAuth } from "@/lib/useAuth";
 interface Question {
   id: string;
   body: string;
+  figure?: string | null;
   layer: number;
   hint: string | null;
   choices: { id: string; body: string; order: number }[];

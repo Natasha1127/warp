@@ -48,6 +48,7 @@ model MicroUnit {
 model Question {
   id          String    @id @default(cuid())
   body        String
+  figure      String?   // 図・グラフ等のレンダリング指定（例: "dots|3", "bars|りんご:3,みかん:5", "clock|3:00"）
   layer       Int       // 1:簡単 2:中程度 3:難しい
   explanation String
   hint        String?

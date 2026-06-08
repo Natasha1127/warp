@@ -83,6 +83,7 @@ async function main() {
             const created = await prisma.question.create({
               data: {
                 body: q.body,
+                figure: q.figure ?? null,
                 layer: layerBlock.layer,
                 explanation: q.explanation,
                 hint: q.hint,
