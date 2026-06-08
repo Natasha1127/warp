@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, Suspense } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 
@@ -20,6 +20,17 @@ function LoginInner() {
   const [grade, setGrade] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  // すでにログイン済みならホーム（next先）へ
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/auth/me").then((r) => {
+      if (r.ok && !cancelled) router.replace(next);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [next, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
