@@ -4,6 +4,7 @@ import { z } from "zod";
 import { computeNextState } from "@/lib/warp-algorithm";
 import type { AnswerResult, SessionSnapshot, WarpDestination, WarpFrame } from "@/types/warp";
 import { prerequisiteMicroUnitId } from "@/data/prerequisites";
+import { getCurrentUserId } from "@/lib/auth";
 
 const AnswerSchema = z.object({
   sessionId: z.string(),
@@ -42,6 +43,11 @@ export async function POST(req: NextRequest) {
   ]);
   if (!session || !question) {
     return Response.json({ error: "Not found" }, { status: 404 });
+  }
+  // 本人のセッションのみ操作可能
+  const userId = await getCurrentUserId();
+  if (!userId || userId !== session.userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   const selectedChoice = question.choices.find(

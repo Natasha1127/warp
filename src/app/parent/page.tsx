@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
-const DEMO_USER_ID = "demo-user";
+import { useAuth } from "@/lib/useAuth";
 
 interface UnitStat {
   unitId: string;
@@ -34,13 +33,14 @@ function accuracyColor(acc: number): string {
 }
 
 export default function ParentPage() {
+  useAuth();
   const [data, setData] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/stats?userId=${DEMO_USER_ID}`)
+    fetch(`/api/stats`)
       .then((r) => {
         if (!r.ok) throw new Error();
         return r.json();

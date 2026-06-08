@@ -1,8 +1,26 @@
 import Link from "next/link";
+import { getCurrentUser } from "@/lib/auth";
+import LogoutButton from "@/components/LogoutButton";
 
-export default function Home() {
+export default async function Home() {
+  const user = await getCurrentUser();
+
   return (
     <div className="space-bg min-h-screen flex flex-col items-center justify-center px-6 py-12">
+      {/* 右上：ログイン状態 */}
+      <div className="absolute top-4 right-5 z-20 flex items-center gap-3">
+        {user ? (
+          <>
+            <span className="text-xs font-bold text-white/80">👋 {user.name}さん</span>
+            <LogoutButton />
+          </>
+        ) : (
+          <Link href="/login" className="text-xs font-bold text-white/80 hover:text-white underline underline-offset-2">
+            ログイン
+          </Link>
+        )}
+      </div>
+
       {/* マスコット */}
       <div className="relative z-10 flex flex-col items-center text-center max-w-md w-full">
         <div className="text-8xl mb-6 float select-none">🚀</div>
@@ -18,13 +36,13 @@ export default function Home() {
           きみだけの学習ルートで、星を一つずつクリアしよう。
         </p>
 
-        {/* メインCTA：いまの学習状況にあわせて自動で開始 */}
+        {/* メインCTA：ログイン済みなら学習開始、未ログインならログインへ */}
         <Link
-          href="/start"
+          href={user ? "/start" : "/login?next=/start"}
           className="duo3d w-full py-4 rounded-2xl font-display font-extrabold text-lg text-white text-center mb-4"
           style={{ background: "#58cc02", ["--d3d" as string]: "#3f9700" }}
         >
-          はじめる
+          {user ? "はじめる" : "ログインしてはじめる"}
         </Link>
 
         {/* メイン：学年をえらぶ */}

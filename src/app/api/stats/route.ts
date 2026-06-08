@@ -1,20 +1,20 @@
-import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import type { AnswerResult } from "@prisma/client";
+import { getCurrentUserId } from "@/lib/auth";
 
 /**
- * 学習状況の集計を返す。
- * GET /api/stats?userId=demo-user
+ * ログイン中ユーザーの学習状況の集計を返す。
+ * GET /api/stats
  *
  * - サマリー（総解答数・正答率・ヒント利用・連続学習日数など）
  * - 単元ごとの成績（学年・単元名・正答率）
  * - 苦手な単元（正答率が低い順）
  * - 最近の解答履歴
  */
-export async function GET(req: NextRequest) {
-  const userId = req.nextUrl.searchParams.get("userId");
+export async function GET() {
+  const userId = await getCurrentUserId();
   if (!userId) {
-    return Response.json({ error: "userId required" }, { status: 400 });
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
   }
 
   // 解答履歴（問題→マイクロ単元→単元→教科 まで取得）

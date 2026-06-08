@@ -1,9 +1,9 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { getCurrentUserId } from "@/lib/auth";
 
 const CreateSessionSchema = z.object({
-  userId: z.string(),
   subjectId: z.string().optional(),
   grade: z.number().optional(),
   microUnitId: z.string().optional(),
@@ -12,12 +12,15 @@ const CreateSessionSchema = z.object({
 
 /** セッション開始：最初のマイクロ単元・レイヤー1からスタート */
 export async function POST(req: NextRequest) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
   const body = await req.json();
   const parsed = CreateSessionSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.flatten() }, { status: 400 });
   }
-  const { userId } = parsed.data;
   let { subjectId } = parsed.data;
 
   // gradeが指定された場合は学年から教科を特定（最初の教科）

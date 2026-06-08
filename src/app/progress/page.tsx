@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
-const DEMO_USER_ID = "demo-user";
+import { useAuth } from "@/lib/useAuth";
 
 interface UnitStat {
   unitId: string;
@@ -50,17 +49,19 @@ function accuracyColor(acc: number): string {
 }
 
 export default function ProgressPage() {
+  const { loading: authLoading } = useAuth();
   const [data, setData] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    if (authLoading) return;
     let cancelled = false;
     async function load() {
       setLoading(true);
       setError("");
       try {
-        const res = await fetch(`/api/stats?userId=${DEMO_USER_ID}`);
+        const res = await fetch(`/api/stats`);
         if (!res.ok) throw new Error();
         const json = (await res.json()) as StatsResponse;
         if (!cancelled) setData(json);
@@ -74,7 +75,7 @@ export default function ProgressPage() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [authLoading]);
 
   const empty = data && data.summary.total === 0;
 

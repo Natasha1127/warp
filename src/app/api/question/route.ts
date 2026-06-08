@@ -1,7 +1,12 @@
 import { NextRequest } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getCurrentUserId } from "@/lib/auth";
 
 export async function GET(req: NextRequest) {
+  const userId = await getCurrentUserId();
+  if (!userId) {
+    return Response.json({ error: "ログインが必要です" }, { status: 401 });
+  }
   const sessionId = req.nextUrl.searchParams.get("sessionId");
   if (!sessionId) {
     return Response.json({ error: "sessionId required" }, { status: 400 });
@@ -15,6 +20,9 @@ export async function GET(req: NextRequest) {
   });
   if (!session) {
     return Response.json({ error: "Session not found" }, { status: 404 });
+  }
+  if (session.userId !== userId) {
+    return Response.json({ error: "アクセス権がありません" }, { status: 403 });
   }
 
   const answeredIds = session.answerHistories.map((h: { questionId: string }) => h.questionId);

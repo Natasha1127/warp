@@ -4,8 +4,7 @@ import { useEffect, useState, useCallback, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import QuestionCard from "@/components/QuestionCard";
-
-const DEMO_USER_ID = "demo-user";
+import { useAuth } from "@/lib/useAuth";
 
 interface Question {
   id: string;
@@ -42,6 +41,7 @@ interface AnswerFeedback {
 type Phase = "loading" | "question" | "error";
 
 function StudyPage() {
+  const { loading: authLoading } = useAuth();
   const searchParams = useSearchParams();
   const grade = searchParams.get("grade") ?? "4";
   const unitId = searchParams.get("unitId") ?? undefined;
@@ -59,11 +59,12 @@ function StudyPage() {
   const pendingCelebrateRef = useRef(false);
 
   useEffect(() => {
+    if (authLoading) return;
     async function startSession() {
       const res = await fetch("/api/session", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: DEMO_USER_ID, grade: Number(grade), unitId, microUnitId }),
+        body: JSON.stringify({ grade: Number(grade), unitId, microUnitId }),
       });
       if (!res.ok) {
         setErrorMsg("セッションの開始に失敗しました。DBが設定されているか確認してください。");
@@ -75,7 +76,7 @@ function StudyPage() {
       setSession(s);
     }
     startSession();
-  }, [grade, unitId, microUnitId]);
+  }, [grade, unitId, microUnitId, authLoading]);
 
   const fetchQuestion = useCallback(async (sid: string) => {
     setPhase("loading");

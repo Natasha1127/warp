@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-
-const DEMO_USER_ID = "demo-user";
+import { useRouter } from "next/navigation";
+import { useAuth, logout } from "@/lib/useAuth";
 
 interface StatsResponse {
   summary: {
@@ -16,12 +16,14 @@ interface StatsResponse {
 }
 
 export default function MyPage() {
+  const router = useRouter();
+  const { user } = useAuth();
   const [data, setData] = useState<StatsResponse | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
-    fetch(`/api/stats?userId=${DEMO_USER_ID}`)
+    fetch(`/api/stats`)
       .then((r) => (r.ok ? r.json() : null))
       .then((j) => {
         if (!cancelled) setData(j);
@@ -34,6 +36,11 @@ export default function MyPage() {
       cancelled = true;
     };
   }, []);
+
+  async function handleLogout() {
+    await logout();
+    router.replace("/login");
+  }
 
   const s = data?.summary;
 
@@ -55,11 +62,14 @@ export default function MyPage() {
         >
           <div className="text-7xl mb-3 float select-none">🧑‍🚀</div>
           <h2 className="font-display text-2xl font-black mb-1" style={{ color: "#3c3c4e" }}>
-            たんけんかさん
+            {user?.name ?? "たんけんか"}さん
           </h2>
           <p className="text-sm font-bold" style={{ color: "#7c6ff0" }}>
-            WARPで宇宙を冒険中！
+            {user?.grade ? `${user.grade}年生 ・ ` : ""}WARPで宇宙を冒険中！
           </p>
+          {user?.email && (
+            <p className="text-xs mt-1" style={{ color: "#afa99a" }}>{user.email}</p>
+          )}
         </div>
 
         {loading && (
@@ -86,11 +96,18 @@ export default function MyPage() {
         </Link>
         <Link
           href="/start"
-          className="duo3d block w-full py-4 rounded-2xl font-display font-extrabold text-white text-center"
+          className="duo3d block w-full py-4 rounded-2xl font-display font-extrabold text-white text-center mb-3"
           style={{ background: "#58cc02", ["--d3d" as string]: "#3f9700" }}
         >
           学習をはじめる →
         </Link>
+        <button
+          onClick={handleLogout}
+          className="duo3d block w-full py-3.5 rounded-2xl font-display font-extrabold text-center glass text-white"
+          style={{ ["--d3d" as string]: "rgba(0,0,0,0.3)" }}
+        >
+          ログアウト
+        </button>
       </div>
     </div>
   );
