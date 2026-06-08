@@ -9,6 +9,12 @@ export interface AuthUser {
   name: string;
   role: string;
   grade: number | null;
+  surveyCompleted?: boolean;
+  studyingMicroUnitId?: string | null;
+  studyingUnitName?: string | null;
+  goal?: string | null;
+  favoriteSubject?: string | null;
+  weakSubject?: string | null;
 }
 
 /**

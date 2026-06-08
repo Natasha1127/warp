@@ -93,6 +93,14 @@ model User {
   grade        Int?
   createdAt    DateTime @default(now())
 
+  // 新規登録アンケート
+  surveyCompleted     Boolean @default(false)
+  studyingMicroUnitId String?
+  studyingUnitName    String?
+  goal                String?
+  favoriteSubject     String?
+  weakSubject         String?
+
   childrenIds String[]
   parentIds   String[]
 

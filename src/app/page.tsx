@@ -11,6 +11,16 @@ export default async function Home() {
     redirect("/login?next=/");
   }
 
+  // 「はじめる」は保存した学年・単元からすぐ学習開始（アンケートは出さない）。
+  // 登録アンケートが未完了のユーザーだけ、アンケート画面へ。
+  let startHref = "/start";
+  if (user.surveyCompleted) {
+    const params = new URLSearchParams();
+    if (user.grade) params.set("grade", String(user.grade));
+    if (user.studyingMicroUnitId) params.set("microUnitId", user.studyingMicroUnitId);
+    startHref = params.toString() ? `/study?${params.toString()}` : "/study";
+  }
+
   return (
     <div className="space-bg min-h-screen flex flex-col items-center justify-center px-6 py-12">
       {/* 右上：ログイン状態 */}
@@ -36,7 +46,7 @@ export default async function Home() {
 
         {/* メインCTA：学習開始 */}
         <Link
-          href="/start"
+          href={startHref}
           className="duo3d w-full py-4 rounded-2xl font-display font-extrabold text-lg text-white text-center mb-4"
           style={{ background: "#58cc02", ["--d3d" as string]: "#3f9700" }}
         >

@@ -52,7 +52,8 @@ function LoginInner() {
         setError(data?.error ?? "うまくいきませんでした。もう一度お試しください。");
         return;
       }
-      router.push(next);
+      // 新規登録のときだけアンケートへ。ログインはそのまま目的地へ。
+      router.push(mode === "register" ? "/start" : next);
       router.refresh();
     } catch {
       setError("通信に失敗しました。もう一度お試しください。");

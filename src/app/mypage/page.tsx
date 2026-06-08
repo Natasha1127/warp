@@ -72,6 +72,30 @@ export default function MyPage() {
           )}
         </div>
 
+        {/* アンケート（登録時の情報） */}
+        {user && (user.studyingUnitName || user.goal || user.favoriteSubject || user.weakSubject) && (
+          <div
+            className="rounded-3xl px-5 py-4 mb-5"
+            style={{ background: "#fffdf8", border: "3px solid rgba(255,255,255,0.6)" }}
+          >
+            <h3 className="font-display text-base font-black mb-3" style={{ color: "#3c3c4e" }}>
+              📋 きみのプロフィール
+            </h3>
+            <div className="space-y-2.5">
+              {user.studyingUnitName && (
+                <SurveyRow icon="📖" label="いま勉強中" value={user.studyingUnitName} />
+              )}
+              {user.goal && <SurveyRow icon="🎯" label="目標" value={user.goal} />}
+              {user.favoriteSubject && (
+                <SurveyRow icon="💖" label="好きな科目" value={user.favoriteSubject} />
+              )}
+              {user.weakSubject && (
+                <SurveyRow icon="💦" label="苦手な科目" value={user.weakSubject} />
+              )}
+            </div>
+          </div>
+        )}
+
         {loading && (
           <div className="text-center text-white/80 mt-6">
             <span className="rocket inline-block">🚀</span> よみこみ中...
@@ -109,6 +133,20 @@ export default function MyPage() {
           ログアウト
         </button>
       </div>
+    </div>
+  );
+}
+
+function SurveyRow({ icon, label, value }: { icon: string; label: string; value: string }) {
+  return (
+    <div className="flex items-center gap-3">
+      <span className="text-lg shrink-0">{icon}</span>
+      <span className="text-xs font-bold shrink-0" style={{ color: "#afa99a", width: "5.5rem" }}>
+        {label}
+      </span>
+      <span className="flex-1 text-sm font-black text-right" style={{ color: "#3c3c4e" }}>
+        {value}
+      </span>
     </div>
   );
 }
