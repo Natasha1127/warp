@@ -253,6 +253,82 @@ body {
 }
 .heart-break { animation: heartBreak 0.5s ease forwards; }
 
+/* ───────── SF HUD（解答画面）テーマ ───────── */
+/* 暗いガラスパネル＋ネオンの枠 */
+.hud-panel {
+  position: relative;
+  background:
+    linear-gradient(180deg, rgba(10,18,40,0.92), rgba(8,12,30,0.92));
+  border: 1.5px solid rgba(34,224,229,0.55);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 1px rgba(34,224,229,0.12) inset,
+    0 0 22px rgba(34,224,229,0.25),
+    0 18px 50px rgba(0,0,0,0.55);
+}
+/* コーナーのカギ括弧（4隅） */
+.hud-corners::before,
+.hud-corners::after {
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2.5px solid #22e0e5;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(34,224,229,0.8));
+}
+.hud-corners::before {
+  top: 8px; left: 8px;
+  border-right: none; border-bottom: none;
+  border-top-left-radius: 6px;
+}
+.hud-corners::after {
+  bottom: 8px; right: 8px;
+  border-left: none; border-top: none;
+  border-bottom-right-radius: 6px;
+}
+
+.neon-gold {
+  color: #f7c948;
+  text-shadow: 0 0 10px rgba(247,201,72,0.7), 0 0 22px rgba(247,201,72,0.4);
+  letter-spacing: 0.04em;
+}
+.neon-cyan {
+  color: #22e0e5;
+  text-shadow: 0 0 8px rgba(34,224,229,0.6);
+}
+
+/* HUD選択肢 */
+.hud-choice {
+  background: linear-gradient(180deg, rgba(20,32,60,0.85), rgba(12,20,42,0.85));
+  border: 1.5px solid var(--hc-border, rgba(34,224,229,0.4));
+  box-shadow: 0 0 0 1px rgba(34,224,229,0.05) inset,
+              0 0 var(--hc-glow, 0px) var(--hc-border, transparent);
+  transition: transform 0.08s ease, box-shadow 0.15s ease,
+              border-color 0.15s ease, background 0.15s ease;
+}
+.hud-choice:hover:not(:disabled) {
+  border-color: #22e0e5;
+  box-shadow: 0 0 14px rgba(34,224,229,0.4);
+  transform: translateX(2px);
+}
+.hud-choice:active:not(:disabled) { transform: scale(0.99); }
+
+/* ヘックス（六角形）ボタン */
+.hex-btn {
+  clip-path: polygon(8% 0, 92% 0, 100% 50%, 92% 100%, 8% 100%, 0 50%);
+  transition: filter 0.12s ease, transform 0.08s ease;
+}
+.hex-btn:hover:not(:disabled) { filter: brightness(1.12); }
+.hex-btn:active:not(:disabled) { transform: scale(0.97); }
+
+/* ネオンのにじみアニメ */
+@keyframes hudGlow {
+  0%, 100% { box-shadow: 0 0 22px rgba(34,224,229,0.25), 0 18px 50px rgba(0,0,0,0.55); }
+  50%      { box-shadow: 0 0 34px rgba(34,224,229,0.45), 0 18px 50px rgba(0,0,0,0.55); }
+}
+.hud-glow-anim { animation: hudGlow 2.6s ease-in-out infinite; }
+
 /* 単元クリアのお祝いポップアップ */
 @keyframes celebratePop {
   0% { transform: scale(0.7); opacity: 0; }
