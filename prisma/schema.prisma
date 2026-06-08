@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ─── マスタデータ ────────────────────────────────────────────────
+
+model Subject {
+  id        String   @id @default(cuid())
+  name      String
+  grade     Int
+  createdAt DateTime @default(now())
+
+  units Unit[]
+}
+
+model Unit {
+  id        String  @id @default(cuid())
+  name      String
+  order     Int
+  subjectId String
+  subject   Subject @relation(fields: [subjectId], references: [id])
+
+  microUnits MicroUnit[]
+
+  @@unique([subjectId, order])
+}
+
+model MicroUnit {
+  id     String @id @default(cuid())
+  name   String
+  order  Int
+  unitId String
+  unit   Unit   @relation(fields: [unitId], references: [id])
+
+  questions          Question[]
+  progressList       LearningProgress[]
+  warpDestinations   Choice[]           @relation("WarpDestination")
+  studySessions      StudySession[]     @relation("CurrentMicroUnit")
+  warpReturnSessions StudySession[]     @relation("WarpReturnMicroUnit")
+
+  @@unique([unitId, order])
+}
+
+model Question {
+  id          String    @id @default(cuid())
+  body        String
+  layer       Int       // 1:簡単 2:中程度 3:難しい
+  explanation String
+  hint        String?
+  microUnitId String
+  microUnit   MicroUnit @relation(fields: [microUnitId], references: [id])
+  createdAt   DateTime  @default(now())
+  createdByAI Boolean   @default(false)
+
+  choices         Choice[]
+  answerHistories AnswerHistory[]
+}
+
+model Choice {
+  id         String   @id @default(cuid())
+  body       String
+  isCorrect  Boolean  @default(false)
+  order      Int
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  // WARP先（不正解2回目時）
+  warpMicroUnitId String?
+  warpMicroUnit   MicroUnit? @relation("WarpDestination", fields: [warpMicroUnitId], references: [id])
+  warpLayer       Int?
+
+  @@unique([questionId, order])
+}
+
+// ─── ユーザー ────────────────────────────────────────────────────
+
+enum UserRole {
+  STUDENT
+  PARENT
+  ADMIN
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         UserRole @default(STUDENT)
+  grade        Int?
+  createdAt    DateTime @default(now())
+
+  childrenIds String[]
+  parentIds   String[]
+
+  progressList    LearningProgress[]
+  studySessions   StudySession[]
+  answerHistories AnswerHistory[]
+}
+
+// ─── 学習進捗 ────────────────────────────────────────────────────
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
+
+model LearningProgress {
+  id          String         @id @default(cuid())
+  userId      String
+  user        User           @relation(fields: [userId], references: [id])
+  microUnitId String
+  microUnit   MicroUnit      @relation(fields: [microUnitId], references: [id])
+  layer       Int
+  status      ProgressStatus @default(NOT_STARTED)
+  updatedAt   DateTime       @updatedAt
+
+  @@unique([userId, microUnitId, layer])
+}
+
+// ─── 学習セッション ───────────────────────────────────────────────
+
+enum SessionState {
+  NORMAL
+  WARPED
+}
+
+model StudySession {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  subjectId String
+  startedAt DateTime @default(now())
+  endedAt   DateTime?
+
+  currentMicroUnitId String
+  currentMicroUnit   MicroUnit @relation("CurrentMicroUnit", fields: [currentMicroUnitId], references: [id])
+  currentLayer       Int
+  layerQuestionCount Int          @default(0) // 現レイヤーで出題した問題数
+  consecutiveCorrect Int          @default(0)
+  consecutiveWrong   Int          @default(0)
+
+  state                SessionState @default(NORMAL)
+  warpReturnMicroUnitId String?
+  warpReturnMicroUnit   MicroUnit?  @relation("WarpReturnMicroUnit", fields: [warpReturnMicroUnitId], references: [id])
+  warpReturnLayer      Int?
+
+  // 多段WARP（前提単元へ遡る根本原因の解消）用の戻り先スタック
+  // [{ microUnitId, layer }] を配列で保持（最後尾が直近の戻り先）
+  warpStack  Json    @default("[]")
+  // 直近のWARPで生徒に表示する根本原因メッセージ
+  warpReason String?
+
+  answerHistories AnswerHistory[]
+}
+
+// ─── 解答履歴 ────────────────────────────────────────────────────
+
+enum AnswerResult {
+  CORRECT_NO_HINT
+  CORRECT_WITH_HINT
+  WRONG
+}
+
+model AnswerHistory {
+  id         String       @id @default(cuid())
+  userId     String
+  user       User         @relation(fields: [userId], references: [id])
+  sessionId  String
+  session    StudySession @relation(fields: [sessionId], references: [id])
+  questionId String
+  question   Question     @relation(fields: [questionId], references: [id])
+  choiceId   String?
+  result     AnswerResult
+  answeredAt DateTime     @default(now())
+}
